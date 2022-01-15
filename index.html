@@ -188,6 +188,7 @@
           Click the share button to get a plausible wordle result in your clipboard.<br />
           Share to your heart's content.<br />
           <b>AMAZE</b> your friends.<br />
+          Of course, you should actually go play real <a href="https://www.powerlanguage.co.uk/wordle/">WORDLE</a>!
         </p>
       </div>
     </div>
@@ -370,7 +371,7 @@
     function step() {
       let t = document.getElementById('time');
       t.innerHTML = timeToMidnight();
-      let w = document.getElementById('next');
+      window.requestAnimationFrame(step);
     }
 
     window.requestAnimationFrame(step);

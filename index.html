@@ -229,7 +229,11 @@
           </div>
           <div>
             <p>If you know the word contains a letter, enter them here:</p>
-            <input type="text" id="contains" name="contains" minlength="5" maxlength="5" size="10">
+            <input type="text" id="contains" name="contains" minlength="0" maxlength="5" size="10">
+          </div>
+          <div>
+            <p>Finally, what letters do you know are not in the answer:</p>
+            <input type="text" id="missing" name="missing" minlength="0" maxlength="20" size="10">
           </div>
           <div id="possibles"></div>
         </div>
@@ -301,6 +305,7 @@
 
     let word = '';
     let contains = '';
+    let missing = '';
 
     function findPossibles() {
       let possibles = [];
@@ -314,7 +319,6 @@
           }
         }
         if (potential && contains.length) {
-          potential = true;
           for (let j = 0; j < contains.length; j++) {
             let found = false;
             for (let k = 0; k < w.length; k++) {
@@ -324,6 +328,21 @@
               }
             }
             if (!found) {
+              potential = false;
+              break;
+            }
+          }
+        }
+        if (potential && missing.length) {
+          for (let j = 0; j < missing.length; j++) {
+            let found = false;
+            for (let k = 0; k < w.length; k++) {
+              if (missing[j] === w[k]) {
+                found = true;
+                break;
+              }
+            }
+            if (found) {
               potential = false;
               break;
             }
@@ -339,8 +358,8 @@
         for (let i = 0; i < Math.min(10, possibles.length); i++) {
           retstr += possibles[i] + '<br />';
         }
-        if (possibles.length > 10) {
-          retstr += "... and " + (possibles.length - 10) + ' more';
+        if (possibles.length > 20) {
+          retstr += "... and " + (possibles.length - 20) + ' more';
         }
         return retstr;
       } else {
@@ -355,6 +374,11 @@
 
     document.getElementById('contains').oninput = function (e) {
       contains = e.target.value.toUpperCase();
+      document.getElementById('possibles').innerHTML = findPossibles();
+    }
+
+    document.getElementById('missing').oninput = function (e) {
+      missing = e.target.value.toUpperCase();
       document.getElementById('possibles').innerHTML = findPossibles();
     }
 

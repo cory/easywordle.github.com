@@ -1,0 +1,20 @@
+{
+  "name": "easywordle.github.com",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Joke wordle project",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cory/easywordle.github.com.git"
+  },
+  "author": "Cory Ondrejka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cory/easywordle.github.com/issues"
+  },
+  "homepage": "https://github.com/cory/easywordle.github.com#readme"
+}

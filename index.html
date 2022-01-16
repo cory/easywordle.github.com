@@ -12,7 +12,7 @@
       font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
       font-size: 16px;
       background-color: rgb(18, 18, 19);
-      color: #d7dadc;
+      color: #d6ebfa;
       --green: #538d4e;
       --darkgreen: #538d4e;
       user-select: none;
@@ -85,6 +85,15 @@
       margin: 2px;
     }
 
+    input {
+      font-size: 32px;
+      border: solid 1px #d6ebfa;
+      border-radius: 4px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      padding: 4px;
+    }
+
     .overlayin {
       animation-duration: 0.1s;
       animation-name: overlayin;
@@ -132,9 +141,9 @@
           </path>
         </svg>
         <title>WORDLEASY</title>
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" style="visibility: hidden;">
-          <path fill="#878a8c"
-            d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z">
+        <svg id="cheat" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"
+          style="cursor: pointer;">
+          <path fill="#878a8c" d="M16,11V3H8v6H2v12h20V11H16z M10,5h4v14h-4V5z M4,11h4v8H4V11z M20,19h-4v-6h4V19z">
           </path>
         </svg>
       </header>
@@ -191,6 +200,38 @@
           Of course, you should actually go play real <a href="https://www.powerlanguage.co.uk/wordle/">WORDLE</a>!
         </p>
       </div>
+      <div id="cheatpop" style="display:none;">
+        <div style="display:flex; justify-content: space-between; align-items: center; height: 100px;">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"
+            style="visibility: hidden;">
+            <path fill="#d7dadc"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
+            </path>
+          </svg>
+          <div>THE PAGE FOR CHEATERS</div>
+          <svg id="closecheat" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"
+            style="cursor:pointer;">
+            <path fill="#d7dadc"
+              d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
+            </path>
+          </svg>
+        </div>
+        <p>
+          WORDLE too hard for you but you still want to know the answer?<br />
+          WORDLEASY is here to help!<br />
+        </p>
+        <div style="border-top: 1px solid #d6ebfa; margin-top:16px;padding-top:16px;">
+          <div>
+            <p>Put in what you know about the word.<br />Use '?' as a wildcard for letters you don't know:</p>
+            <input type="text" id="word" name="word" minlength="5" maxlength="5" size="10">
+          </div>
+          <div>
+            <p>If you know the word contains a letter, enter them here:</p>
+            <input type="text" id="contains" name="contains" minlength="5" maxlength="5" size="10">
+          </div>
+          <div id="possibles"></div>
+        </div>
+      </div>
     </div>
     <div style='bottom:50px; position:absolute; width: 100%; text-align: center;'>copyright (c) 2022 cory ondrejka</div>
   </div>
@@ -202,39 +243,129 @@
     }
 
     document.getElementById('share').onclick = function share() {
-      navigator.clipboard.writeText(buildWordleBlob()).then(function () {
-      }, function () {
-      });
+      let el = document.createElement('textarea');
+      el.value = buildWordleBlob();
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
     };
-    function animationOutEnd() {
-      let el = document.getElementById('popover');
+
+    function animationOutEnd(el) {
       el.className = '';
       el.style.display = "none";
     }
-    document.getElementById('help').onclick = function help(e) {
-      let el = document.getElementById('popover');
-      el.removeEventListener("animationend", animationOutEnd, true);
+
+    function openPopOver(el) {
+      el.removeEventListener("animationend", el.listener, true);
       el.style.display = "inline";
       el.style.position = "absolute";
       el.style.height = "100%";
       el.style.width = "500px";
       el.className = 'overlayin';
-    };
-    document.getElementById('close').onclick = function help(e) {
+    }
+    document.getElementById('help').onclick = function (e) {
+      e.stopPropagation();
+      e.preventDefault();
       let el = document.getElementById('popover');
-      el.addEventListener("animationend", animationOutEnd, true);
-      el.className = 'overlayout';
+      openPopOver(el);
     };
+    document.getElementById('cheat').onclick = function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      let el = document.getElementById('cheatpop');
+      openPopOver(el);
+    };
+    function closePopOver(el) {
+      el.listener = function () { animationOutEnd(el) };
+      el.addEventListener("animationend", el.listener, true);
+      el.className = 'overlayout';
+    }
+    document.getElementById('close').onclick = function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      let el = document.getElementById('popover');
+      closePopOver(el);
+    };
+    document.getElementById('closecheat').onclick = function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      let el = document.getElementById('cheatpop');
+      closePopOver(el);
+    };
+
+
+    let word = '';
+    let contains = '';
+
+    function findPossibles() {
+      let possibles = [];
+      for (let i = 0; i < wordlist.length; i++) {
+        let w = wordlist[i];
+        let potential = true;
+        for (let j = 0; j < word.length; j++) {
+          if (word[j] !== '?' && word[j] !== w[j]) {
+            potential = false;
+            break;
+          }
+        }
+        if (potential && contains.length) {
+          potential = true;
+          for (let j = 0; j < contains.length; j++) {
+            let found = false;
+            for (let k = 0; k < w.length; k++) {
+              if (contains[j] === w[k]) {
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              potential = false;
+              break;
+            }
+          }
+        }
+        if (!potential) {
+          continue;
+        }
+        possibles.push(w);
+      }
+      if (possibles.length) {
+        let retstr = '';
+        for (let i = 0; i < Math.min(10, possibles.length); i++) {
+          retstr += possibles[i] + '<br />';
+        }
+        if (possibles.length > 10) {
+          retstr += "... and " + (possibles.length - 10) + ' more';
+        }
+        return retstr;
+      } else {
+        return "No words match";
+      }
+    }
+
+    document.getElementById('word').oninput = function (e) {
+      word = e.target.value.toUpperCase();
+      document.getElementById('possibles').innerHTML = findPossibles();
+    }
+
+    document.getElementById('contains').oninput = function (e) {
+      contains = e.target.value.toUpperCase();
+      document.getElementById('possibles').innerHTML = findPossibles();
+    }
 
     let hardmode = false;
     let smart = false;
 
-    document.getElementById('hardmode').onchange = function hard() {
+    document.getElementById('hardmode').onchange = function () {
       hardmode = !hardmode;
       updateResult();
     }
 
-    document.getElementById('smart').onchange = function hard() {
+    document.getElementById('smart').onchange = function () {
       smart = !smart;
       updateResult();
     }
@@ -367,6 +498,40 @@
     }
 
     updateResult();
+
+    function fetcher(uri, cb) {
+      fetch(uri, { cache: "no-store" }).then((response) => {
+        let reader = response.body.getReader();
+        const ce = response.headers.get('content-encoding');
+        let dataSoFar = 0;
+        let dataBlocks = [];
+
+        function pump(pcb) {
+          return reader.read().then(({ value, done }) => {
+            if (done) {
+              let rawData = new Uint8Array(dataSoFar);
+              let idx = 0;
+              for (let i = 0; i < dataBlocks.length; i++) {
+                rawData.set(dataBlocks[i], idx);
+                idx += dataBlocks[i].length;
+              }
+              const data = new TextDecoder("utf-8").decode(rawData);
+              return cb(data);
+            }
+
+            dataBlocks.push(value);
+            dataSoFar += value.byteLength;
+            pump(pcb);
+          });
+        }
+        pump(cb);
+      });
+    }
+
+    let wordlist;
+    fetcher('./fiveletterwords.txt', function (data) {
+      wordlist = data.split('\n');
+    });
 
     function step() {
       let t = document.getElementById('time');
